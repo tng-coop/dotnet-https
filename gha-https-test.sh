@@ -13,8 +13,11 @@ dotnet new webapi
 dotnet dev-certs https --clean
 dotnet dev-certs https -ep localhost.pfx -p "yourpassword"
 
+# Convert pfx explicitly to pem for curl
+openssl pkcs12 -in localhost.pfx -out localhost.pem -nodes -passin pass:yourpassword
+
 # Trust cert explicitly (Linux)
-sudo cp localhost.pfx /usr/local/share/ca-certificates/localhost.pfx
+sudo cp localhost.pem /usr/local/share/ca-certificates/localhost.crt
 sudo update-ca-certificates || true
 
 # Explicitly start the app in the background
@@ -24,7 +27,7 @@ dotnet run --urls "https://localhost:5001" &
 sleep 10
 
 # Explicitly test HTTPS using curl
-curl --cacert localhost.pfx https://localhost:5001/swagger
+curl --cacert localhost.pem https://localhost:5001/swagger
 
 # Cleanup explicitly
 kill %1
