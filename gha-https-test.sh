@@ -13,7 +13,7 @@ dotnet new webapi
 dotnet dev-certs https --clean
 dotnet dev-certs https -ep localhost.pfx -p "yourpassword"
 
-# Convert pfx explicitly to pem for curl
+# Convert explicitly to PEM format for curl
 openssl pkcs12 -in localhost.pfx -out localhost.pem -nodes -passin pass:yourpassword
 
 # Trust cert explicitly (Linux)
