@@ -37,7 +37,7 @@ sleep 10
 # Explicitly test HTTPS using curl
 # curl -L --cacert localhost.pem https://localhost:5001/swagger
 
-openssl s_client -connect localhost:7080 -showcerts </dev/null 2>/dev/null | openssl x509 -noout -text
+openssl s_client -connect localhost:5001 -showcerts </dev/null 2>/dev/null | openssl x509 -noout -text
 
 # Explicitly test HTTPS using Google Chrome Headless
 # google-chrome --headless --dump-dom --no-sandbox https://localhost:5001/swagger
