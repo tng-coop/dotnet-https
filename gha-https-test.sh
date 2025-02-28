@@ -2,10 +2,6 @@
 
 set -e
 
-# Explicitly install libnss3-tools for NSS management
-sudo apt-get update
-sudo apt-get install -y libnss3-tools
-
 # Create directories explicitly
 mkdir -p my-aspnet-app
 cd my-aspnet-app
@@ -24,7 +20,7 @@ openssl pkcs12 -in localhost.pfx -out localhost.pem -nodes -passin pass:yourpass
 sudo cp localhost.pem /usr/local/share/ca-certificates/localhost.crt
 sudo update-ca-certificates || true
 
-# Explicitly initialize NSS database if not already initialized
+# Initialize NSS database if not already initialized
 mkdir -p $HOME/.pki/nssdb
 certutil -d sql:$HOME/.pki/nssdb -N --empty-password
 
