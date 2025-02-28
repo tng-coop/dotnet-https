@@ -15,5 +15,5 @@ jobs:
 
       - name: Explicitly Create ASP.NET App and Test HTTPS
         run: |
-          chmod +x ./gha_https_test.sh
-          ./gha_https_test.sh
+          chmod +x ./gha-https-test.sh
+          ./gha-https-test.sh
