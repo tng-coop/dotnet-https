@@ -29,3 +29,17 @@ jobs:
       run: |
         chmod +x ./gha-https-test.sh
         ./gha-https-test.sh
+
+    - name: Display generated certificate files
+      run: |
+        echo "-----BEGIN Localhost CA Certificate-----"
+        cat my-aspnet-app/localhost-ca.crt
+        echo "-----END Localhost CA Certificate-----"
+
+        echo "-----BEGIN Localhost Server Certificate-----"
+        cat my-aspnet-app/localhost.crt
+        echo "-----END Localhost Server Certificate-----"
+
+        echo "-----BEGIN appsettings.json-----"
+        cat my-aspnet-app/appsettings.json
+        echo "-----END appsettings.json-----"
