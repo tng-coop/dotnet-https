@@ -27,7 +27,7 @@ dotnet run --urls "https://localhost:5001" &
 sleep 10
 
 # Explicitly test HTTPS using curl
-curl --cacert localhost.pem https://localhost:5001/swagger
+curl -L --cacert localhost.pem https://localhost:5001/swagger
 
 # Cleanup explicitly
 kill %1
