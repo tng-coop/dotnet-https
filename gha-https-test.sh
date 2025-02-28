@@ -2,6 +2,10 @@
 
 set -e
 
+# Explicitly install libnss3-tools for NSS management
+sudo apt-get update
+sudo apt-get install -y libnss3-tools
+
 # Create directories explicitly
 mkdir -p my-aspnet-app
 cd my-aspnet-app
