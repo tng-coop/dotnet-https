@@ -14,10 +14,16 @@ jobs:
       with:
         dotnet-version: '8.x'
 
-    - name: Install required packages explicitly
+    - name: Install required packages
       run: |
         sudo apt-get update
-        sudo apt-get install -y libnss3-tools google-chrome-stable
+        sudo apt-get install -y libnss3-tools
+
+    - name: Set up Google Chrome
+      uses: browser-actions/setup-chrome@v1
+      with:
+        chrome-version: 'latest'
+        install-dependencies: true
 
     - name: Run HTTPS Test script
       run: |

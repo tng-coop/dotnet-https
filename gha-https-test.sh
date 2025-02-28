@@ -20,7 +20,7 @@ openssl pkcs12 -in localhost.pfx -out localhost.pem -nodes -passin pass:yourpass
 sudo cp localhost.pem /usr/local/share/ca-certificates/localhost.crt
 sudo update-ca-certificates || true
 
-# Initialize NSS database if not already initialized
+# Explicitly initialize NSS database if not already initialized
 mkdir -p $HOME/.pki/nssdb
 certutil -d sql:$HOME/.pki/nssdb -N --empty-password
 
@@ -36,6 +36,9 @@ sleep 10
 
 # Explicitly test HTTPS using curl
 curl -L --cacert localhost.pem https://localhost:5001/swagger
+
+# Explicitly test HTTPS using Google Chrome Headless
+google-chrome --headless --dump-dom --no-sandbox https://localhost:5001/swagger
 
 # Cleanup explicitly
 kill %1
