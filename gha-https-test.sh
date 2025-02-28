@@ -24,6 +24,10 @@ openssl pkcs12 -in localhost.pfx -out localhost.pem -nodes -passin pass:yourpass
 sudo cp localhost.pem /usr/local/share/ca-certificates/localhost.crt
 sudo update-ca-certificates || true
 
+# Explicitly initialize NSS database if not already initialized
+mkdir -p $HOME/.pki/nssdb
+certutil -d sql:$HOME/.pki/nssdb -N --empty-password
+
 # Trust cert explicitly in NSS database for Chrome and verify CT,C,C
 certutil -d sql:$HOME/.pki/nssdb -A -t "CT,C,C" -n "LocalhostDevelopmentCA" -i localhost.pem
 certutil -d sql:$HOME/.pki/nssdb -L | grep LocalhostDevelopmentCA
