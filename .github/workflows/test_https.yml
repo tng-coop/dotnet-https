@@ -1,0 +1,19 @@
+name: Explicitly Test ASP.NET HTTPS with curl
+
+on: [push]
+
+jobs:
+  test-https:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Explicitly Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Explicitly Create ASP.NET App and Test HTTPS
+        run: |
+          chmod +x ./gha_https_test.sh
+          ./gha_https_test.sh
