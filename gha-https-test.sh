@@ -2,45 +2,66 @@
 
 set -e
 
-# Create directories explicitly
+# Explicit Variables
+CERT_PASSWORD="yourpassword"
+CA_NAME="LocalhostDevelopmentCA"
+
+# Explicitly create directories and project
 mkdir -p my-aspnet-app
 cd my-aspnet-app
-
-# Create ASP.NET Core project explicitly
 dotnet new webapi
 
-# Generate HTTPS cert explicitly
+# Clean existing certs
+rm -rf ~/.aspnet/https/* ~/.dotnet/corefx/cryptography/x509stores/*
 dotnet dev-certs https --clean
-dotnet dev-certs https -ep localhost.pfx -p "yourpassword"
 
-# Convert pfx to PEM format explicitly for curl
-openssl pkcs12 -in localhost.pfx -out localhost.pem -nodes -passin pass:yourpassword
+# Explicitly generate Root CA
+openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
+  -keyout localhost-ca.key -out localhost-ca.crt \
+  -subj "/CN=${CA_NAME}" -addext "basicConstraints=critical,CA:true"
 
-# Trust cert explicitly (Linux system store)
-sudo cp localhost.pem /usr/local/share/ca-certificates/localhost.crt
+# Explicitly trust CA cert (Linux store)
+sudo cp localhost-ca.crt /usr/local/share/ca-certificates/${CA_NAME}.crt
 sudo update-ca-certificates || true
 
-# Explicitly initialize NSS database if not already initialized
+# Explicitly trust CA cert in Chrome's NSS DB
 mkdir -p $HOME/.pki/nssdb
-certutil -d sql:$HOME/.pki/nssdb -N --empty-password
+certutil -d sql:$HOME/.pki/nssdb -N --empty-password || true
+certutil -d sql:$HOME/.pki/nssdb -A -t "CT,C,C" -n "${CA_NAME}" -i localhost-ca.crt
+certutil -d sql:$HOME/.pki/nssdb -L | grep ${CA_NAME}
 
-# Trust cert explicitly in NSS database for Chrome and verify CT,C,C
-certutil -d sql:$HOME/.pki/nssdb -A -t "CT,C,C" -n "LocalhostDevelopmentCA" -i localhost.pem
-certutil -d sql:$HOME/.pki/nssdb -L | grep LocalhostDevelopmentCA
+# Explicitly generate localhost cert signed by CA
+openssl req -newkey rsa:4096 -nodes \
+  -keyout localhost.key -out localhost.csr \
+  -subj "/CN=localhost"
 
-# Explicitly start the app in the background
-dotnet run --urls "https://localhost:5001" &
+openssl x509 -req -in localhost.csr -CA localhost-ca.crt -CAkey localhost-ca.key \
+  -CAcreateserial -out localhost.crt -days 3650 -sha256 \
+  -extfile <(echo "subjectAltName=DNS:localhost")
 
-# Explicitly wait for the app to start
+# Explicitly create localhost PFX
+openssl pkcs12 -export -out localhost.pfx -inkey localhost.key \
+  -in localhost.crt -passout pass:"${CERT_PASSWORD}"
+
+# Convert to PEM explicitly for curl
+openssl pkcs12 -in localhost.pfx -out localhost.pem -nodes -passin pass:"${CERT_PASSWORD}"
+
+# Start ASP.NET Core explicitly with your own cert
+dotnet run --urls "https://localhost:5001" \
+  --Kestrel:Certificates:Default:Path=localhost.pfx \
+  --Kestrel:Certificates:Default:Password="${CERT_PASSWORD}" &
+
+# Explicit wait for server startup
 sleep 10
 
-# Explicitly test HTTPS using curl
-# curl -L --cacert localhost.pem https://localhost:5001/swagger
-
+# Explicit verification (OpenSSL)
 openssl s_client -connect localhost:5001 -showcerts </dev/null 2>/dev/null | openssl x509 -noout -text
 
-# Explicitly test HTTPS using Google Chrome Headless
-# google-chrome --headless --dump-dom --no-sandbox https://localhost:5001/swagger
+# Explicitly verify HTTPS via curl
+curl -vL --cacert localhost-ca.crt https://localhost:5001/swagger
 
-# Cleanup explicitly
+# Explicitly verify HTTPS via Chrome Headless
+google-chrome --headless --disable-gpu --no-sandbox --dump-dom https://localhost:5001/swagger
+
+# Explicit cleanup
 kill %1
