@@ -46,10 +46,28 @@ openssl pkcs12 -export -out localhost.pfx -inkey localhost.key \
 # Convert to PEM explicitly for curl
 openssl pkcs12 -in localhost.pfx -out localhost.pem -nodes -passin pass:"${CERT_PASSWORD}"
 
-# Start ASP.NET Core explicitly with your own cert
-dotnet run --urls "https://localhost:5001" \
-  --Kestrel:Certificates:Default:Path=localhost.pfx \
-  --Kestrel:Certificates:Default:Password="${CERT_PASSWORD}" &
+# Explicitly create appsettings.json with HTTPS configuration
+cat > appsettings.json <<EOF
+{
+  "Kestrel": {
+    "Endpoints": {
+      "Https": {
+        "Url": "https://localhost:5001"
+      }
+    },
+    "Certificates": {
+      "Default": {
+        "Path": "localhost.pfx",
+        "Password": "${CERT_PASSWORD}"
+      }
+    }
+  }
+}
+EOF
+
+# Explicitly start ASP.NET Core application using configured cert
+dotnet run &
+
 
 # Explicit wait for server startup
 sleep 10
