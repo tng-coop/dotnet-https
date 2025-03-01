@@ -19,8 +19,10 @@ fi
 # Remove existing CA and cert files to ensure idempotency
 rm -f localhost-ca.* localhost.* *.pfx *.pem *.csr *.srl
 
-# Remove existing CA from NSS DB (idempotency)
-certutil -d sql:$HOME/.pki/nssdb -D -n "${CA_NAME}" || true
+# Reset NSS DB completely to remove all existing certificates (idempotency)
+rm -rf $HOME/.pki/nssdb
+mkdir -p $HOME/.pki/nssdb
+certutil -d sql:$HOME/.pki/nssdb -N --empty-password
 
 # Generate new Root CA
 openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
@@ -32,8 +34,6 @@ sudo cp localhost-ca.crt /usr/local/share/ca-certificates/${CA_NAME}.crt
 sudo update-ca-certificates || true
 
 # Trust CA cert in Chrome's NSS DB
-mkdir -p $HOME/.pki/nssdb
-certutil -d sql:$HOME/.pki/nssdb -N --empty-password || true
 certutil -d sql:$HOME/.pki/nssdb -A -t "CT,C,C" -n "${CA_NAME}" -i localhost-ca.crt
 
 # Generate localhost cert and sign with CA
