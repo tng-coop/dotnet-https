@@ -82,8 +82,17 @@ fi
 dotnet run &
 SERVER_PID=$!
 
-# Wait for server startup
-sleep 10
+# Wait until server responds or timeout after 30 seconds
+TIMEOUT=30
+while ! curl -fsS --cacert localhost-ca.crt https://localhost:5001/healthz &>/dev/null; do
+    if [ "$TIMEOUT" -le 0 ]; then
+        echo "Server did not start within expected time."
+        exit 1
+    fi
+    sleep 1
+    TIMEOUT=$((TIMEOUT - 1))
+done
+
 
 # Verify certificates via OpenSSL
 openssl s_client -connect localhost:5001 -showcerts </dev/null 2>/dev/null | openssl x509 -noout -text
