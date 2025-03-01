@@ -90,6 +90,7 @@ until curl -fsSL --cacert localhost-ca.crt https://localhost:5001/swagger/index.
         kill $SERVER_PID || true
         exit 1
     fi
+    echo "Waiting for server to start..."
     sleep 1
     TIMEOUT=$((TIMEOUT - 1))
 done
