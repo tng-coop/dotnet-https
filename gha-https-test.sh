@@ -7,13 +7,13 @@ CERT_PASSWORD="yourpassword"
 CA_NAME="LocalhostDevelopmentCA"
 APP_DIR="my-aspnet-app"
 
-# Ensure app directory exists and initialize if needed
-if [ ! -d "$APP_DIR" ]; then
-    mkdir -p "$APP_DIR"
-    cd "$APP_DIR"
+# Ensure app directory exists
+mkdir -p "$APP_DIR"
+cd "$APP_DIR"
+
+# Ensure .NET project exists
+if [ ! -f *.csproj ]; then
     dotnet new webapi
-else
-    cd "$APP_DIR"
 fi
 
 # Remove existing CA and cert files to ensure idempotency
