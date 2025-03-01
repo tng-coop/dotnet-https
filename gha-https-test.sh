@@ -88,11 +88,11 @@ sleep 10
 # Verify certificates via OpenSSL
 openssl s_client -connect localhost:5001 -showcerts </dev/null 2>/dev/null | openssl x509 -noout -text
 
-# Verify HTTPS connection via curl
-curl -vL --cacert localhost-ca.crt https://localhost:5001/swagger
+# Verify Swagger UI via curl (check status 200 and HTML content)
+curl -fsSL --cacert localhost-ca.crt https://localhost:5001/swagger/index.html | grep -q '<title>Swagger UI</title>' && echo "Swagger UI loaded successfully via curl."
 
-# Verify HTTPS via Chrome Headless
-google-chrome --headless --disable-gpu --no-sandbox --dump-dom https://localhost:5001/swagger
+# Verify Swagger UI via Chrome Headless (ensure the Swagger UI page loads correctly)
+google-chrome --headless --disable-gpu --no-sandbox --dump-dom https://localhost:5001/swagger/index.html | grep -q 'swagger-ui' && echo "Swagger UI loaded successfully via Chrome."
 
 # Cleanup: Stop the ASP.NET server after testing
 kill $SERVER_PID || true
